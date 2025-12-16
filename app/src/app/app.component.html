@@ -1,0 +1,10 @@
+<div>
+  <div class="tela">
+    <div class="acoes">
+      @for(acao of acoes; track acao.nome){
+        <span class="botao-acao" (click)="executarAcao(acao.nome)">{{acao.descricao}}</span>
+      }
+    </div>
+    <img style="width: 70%;" src="/personagens.png">
+  </div>
+</div>

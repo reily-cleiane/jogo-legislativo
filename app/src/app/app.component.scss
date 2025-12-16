@@ -1,0 +1,28 @@
+
+.tela{
+    margin: auto;
+    width: 1600px;
+    display: flex;
+    justify-content: center;
+    align-items: start;
+}
+
+.acoes{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 20px 10px;
+}
+
+.botao-acao{
+    display: block;
+    padding: 10px;
+    background-color: #075ba0;
+    border-radius: 5px;
+    color: white;
+
+    &:hover{
+        background-color: #0e3b5f;
+        cursor: pointer;
+    }
+}
