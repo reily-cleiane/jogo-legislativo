@@ -2,21 +2,21 @@ import random
 from .state import GameState, AcaoDia
 from .config import ESFORCO
 
-def aplicar_acao(estado: GameState, a: str):
+def aplicar_acao(estado: GameState, acao: str):
     _clipar(estado)
     divisor = 100
     fator_desempenho = 6.1 * (estado.desempenho/estado.dia)
 
-    if a == "entrar_reuniao" and not estado.em_reuniao:
+    if acao == "entrar_reuniao" and not estado.em_reuniao:
         estado.em_reuniao = 1
 
-    elif a == "sair_reuniao":
+    elif acao == "sair_reuniao":
         estado.em_reuniao = 0
 
-    elif a == "justificar_ausencia" and estado.faltas > 0 and "justificar_ausencia" not in estado.acoes_dia:
+    elif acao == "justificar_ausencia" and estado.faltas > 0 and "justificar_ausencia" not in estado.acoes_dia:
         estado.faltas -= 2
 
-    elif a == "elaborar_pl":
+    elif acao == "elaborar_pl":
         if not estado.em_reuniao and "elaborar_pl" not in estado.acoes_dia:
             estado.desempenho += 1
             delta = estado._impacto_popularidade(1)
@@ -24,7 +24,7 @@ def aplicar_acao(estado: GameState, a: str):
         elif estado.em_reuniao:
             estado.desempenho -= 0.5
 
-    elif a == "relatar_pl":
+    elif acao == "relatar_pl":
         if estado.em_reuniao and "relatar_pl" not in estado.acoes_dia:
             estado.desempenho += 1
             delta = estado._impacto_popularidade(1)
@@ -32,35 +32,35 @@ def aplicar_acao(estado: GameState, a: str):
         elif not estado.em_reuniao:
             estado.desempenho -= 0.5
 
-    elif a == "divulgar_gastos" and "divulgar_gastos" not in estado.acoes_dia:
+    elif acao == "divulgar_gastos" and "divulgar_gastos" not in estado.acoes_dia:
         if not estado.em_reuniao:
             estado.desempenho += 0.5
             estado.transparencia += random.uniform(1, 3)
         else:
             estado.desempenho -= 0.5
 
-    elif a == "acessar_diario" and "acessar_diario" not in estado.acoes_dia:
+    elif acao == "acessar_diario" and "acessar_diario" not in estado.acoes_dia:
         if not estado.em_reuniao:
             estado.desempenho += 0.5
             estado.informacao += random.uniform(1, 3)
         else:
             estado.desempenho -= 0.5
 
-    elif a == "votar_materia":
+    elif acao == "votar_materia":
         if estado.em_reuniao:
             estado.desempenho += 0.5
             estado.popularidade += _impacto_popularidade(estado, 1)
         else:
             estado.desempenho -= 0.5
 
-    elif a == "discutir_materia":
+    elif acao == "discutir_materia":
         if estado.em_reuniao:
             estado.desempenho += 0.5
             estado.popularidade += _impacto_popularidade(estado,2)
         else:
             estado.desempenho -= 0.5
 
-    elif a == "atender_populacao":
+    elif acao == "atender_populacao":
         if not estado.em_reuniao and estado.verba > 0:
             custo = 30000 / max(1, estado.popularidade)
             estado.verba -= custo
@@ -73,7 +73,7 @@ def aplicar_acao(estado: GameState, a: str):
         else:
             estado.desempenho -= 1
 
-    elif a == "convocar_audiencia":
+    elif acao == "convocar_audiencia":
         if not estado.em_reuniao and estado.verba > 0:
             custo = 20000 / max(1, estado.popularidade)
             estado.verba -= custo
@@ -87,19 +87,19 @@ def aplicar_acao(estado: GameState, a: str):
         else:
             estado.desempenho -= 1
 
-    elif a == "aprovar_orcamento" and estado.dia > 300 and not estado.orcamento_aprovado:
+    elif acao == "aprovar_orcamento" and estado.dia > 300 and not estado.orcamento_aprovado:
         estado.orcamento_aprovado = 1
         estado.desempenho += 20
         estado.informacao = 10
         estado.transparencia = 10
         estado.popularidade = 10
 
-    elif a == "tarefas_admin":
+    elif acao == "tarefas_admin":
         if not estado.em_reuniao:
             estado.desempenho += 0.5
             estado.verba += 1000
 
-    elif a == "lidar_crise":
+    elif acao == "lidar_crise":
         if not estado.em_reuniao and estado.verba > 3000:
             reducao = (random.random() + 0.3 ) * ((2+ estado.popularidade/10) + (2+ estado.transparencia/10) + (1+ estado.informacao/10))/3
             estado.verba -= 3000
@@ -108,7 +108,7 @@ def aplicar_acao(estado: GameState, a: str):
         else:
             estado.desempenho -= 0.5
 
-    elif a == "acao_social":
+    elif acao == "acao_social":
         estado.desempenho += 0.5
         estado.verba -= 5000
         estado.popularidade += 0.6 + ((3 * estado.popularidade) + (1 * estado.informacao) + (1 * estado.transparencia))/65

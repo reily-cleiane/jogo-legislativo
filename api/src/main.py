@@ -7,6 +7,7 @@ from .model import DQN
 from .config import ACOES
 from .actions import aplicar_acao
 from .virada_dia import virada_dia
+from fastapi.middleware.cors import CORSMiddleware
 
 from pathlib import Path  # Importe o módulo Path
 
@@ -18,6 +19,21 @@ BASE_DIR = Path(__file__).parent
 MODEL_PATH = BASE_DIR / "dqn_agente.pth"
 
 app = FastAPI()
+
+# 2. Configure as origens permitidas
+origins = [
+    "http://localhost:4200", # Endereço padrão do Angular
+    "http://127.0.0.1:4200",
+]
+
+# 3. Adicione o middleware ao app
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,            # Permite seu front-end
+    allow_credentials=True,
+    allow_methods=["*"],              # Permite todos os métodos (GET, POST, OPTIONS, etc)
+    allow_headers=["*"],              # Permite todos os cabeçalhos
+)
 
 # ------------------ Estado ------------------
 

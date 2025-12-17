@@ -28,6 +28,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # Ambientes Virtuais Python
+ambiente-virtual/
 venv-jogo-simulador-atividade-lesgislativa/
 
 # Outros nomes comuns de ambientes virtuais que podem ser úteis ignorar:
