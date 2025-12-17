@@ -1,28 +1,85 @@
-
-.tela{
-    margin: auto;
-    width: 1600px;
-    display: flex;
-    justify-content: center;
-    align-items: start;
+.game-root {
+  height: 100vh;
+  color: #e5e7eb;
+  width: 100%;
+  padding: 0;
+  margin: 0;
 }
 
-.acoes{
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 24px;
+  background: rgba(0,0,0,0.4);
+}
+.board {
+  display: grid;
+  grid-template-columns: 400px 1fr 400px;
+  height: calc(100vh - 50px);
+  gap: 16px;
+  padding: 16px 0;
+}
+
+.panel {
+  background: #020617;
+  min-width: 400px;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 20px 40px rgba(0,0,0,.4);
+}
+
+.scene {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.scene img {
+  max-width: 90%;
+}
+
+.stats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.actions{
+    position: fixed;
+    bottom: 20px;
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
     gap: 5px;
-    padding: 20px 10px;
+    width: 70%;
+    margin: auto;
+    justify-content: center;
+    padding: 20px;
+    background-color: #1e1031;
+    left: 14.9%;
+    border-radius: 10px;
+
 }
 
-.botao-acao{
-    display: block;
-    padding: 10px;
-    background-color: #075ba0;
-    border-radius: 5px;
-    color: white;
+.actions button {
+  margin-bottom: 6px;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: #cc69eb;
+  color: white;
+  cursor: pointer;
+}
 
-    &:hover{
-        background-color: #0e3b5f;
-        cursor: pointer;
-    }
+.timeline {
+  list-style: none;
+  padding: 0;
+}
+
+.timeline li {
+  background: rgba(255,255,255,.05);
+  padding: 8px;
+  border-left: 3px solid #2563eb;
+  margin-bottom: 8px;
+  border-radius: 6px;
 }

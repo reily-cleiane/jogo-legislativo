@@ -1,0 +1,9 @@
+bs4
+fastapi
+httpx
+numpy
+pydantic
+python-dotenv
+starlette
+uvicorn
+torch

@@ -1,10 +1,82 @@
-<div>
-  <div class="tela">
-    <div class="acoes">
-      @for(acao of acoes; track acao.nome){
-        <span class="botao-acao" (click)="executarAcao(acao.nome)">{{acao.descricao}}</span>
-      }
-    </div>
-    <img style="width: 70%;" src="/personagens.png">
+<div class="game-root">
+  <header class="top-bar">
+    <h1>Simulação Legislativa</h1>
+    <span class="day">Dia {{ estadoJogador.dia }}</span>
+  </header>
+
+  <div class="board">
+
+    <!-- Jogador -->
+    <aside class="panel player" style="padding-left: 50px;">
+      <h2>Você</h2>
+
+      <div class="stats">
+        <div><b>Dia:</b> {{ estadoJogador.dia }}</div>
+        <div><b>Tem reunião:</b> {{ estadoJogador.tem_reuniao ? 'Sim' : 'Não' }}</div>
+        <div><b>Em reunião:</b> {{ estadoJogador.em_reuniao ? 'Sim' : 'Não' }}</div>
+        <div><b>Faltas:</b> {{ estadoJogador.faltas }}</div>
+
+        <label>Popularidade</label>
+        <progress max="10" [value]="estadoJogador.popularidade"></progress>
+
+        <label>Crise</label>
+        <progress max="10" [value]="estadoJogador.crise"></progress>
+
+        <label>Transparência</label>
+        <progress max="10" [value]="estadoJogador.transparencia"></progress>
+
+        <label>Informação</label>
+        <progress max="10" [value]="estadoJogador.informacao"></progress>
+
+        <div><b>Desempenho:</b> {{ estadoJogador.desempenho }}</div>
+        <div><b>Orçamento aprovado:</b> {{ estadoJogador.orcamento_aprovado ? 'Sim' : 'Não' }}</div>
+        <div><b>Verba:</b> R$ {{ estadoJogador.verba }}</div>
+      </div>
+
+      <h3>Ações do dia</h3>
+      <ul class="timeline">
+        <li *ngFor="let acao of estadoJogador.acoes_dia">
+          <strong>{{ acao.nome }}</strong>
+          <small>EFEITOS AQUI</small>
+        </li>
+      </ul>
+
+    </aside>
+
+    <!-- Cena -->
+    <main class="scene">
+      <img src="/personagens.png" alt="Deputados" style="width: 1500px;">
+    </main>
+
+    <!-- Agente -->
+    <aside class="panel agent"  style="padding-right: 50px;">
+      <h2>Oponente</h2>
+
+      <div class="stats">
+        <label>Popularidade</label>
+        <progress max="10" [value]="estadoAgente.popularidade"></progress>
+
+        <label>Crise</label>
+        <progress max="10" [value]="estadoAgente.crise"></progress>
+      </div>
+
+      <h3>Ações do agente</h3>
+      <ul class="timeline">
+        <li *ngFor="let acao of estadoAgente.acoes_dia">
+          <strong>{{ acao.nome }}</strong>
+          <small>EFEITOS AQUI</small>
+        </li>
+      </ul>
+    </aside>
+
   </div>
+</div>
+
+<div class="actions">
+  <p style="color:white; width: 100%">Escolha uma ação:</p>
+  <button
+    *ngFor="let acao of acoes"
+    (click)="executarAcao(acao.nome)">
+    {{ acao.descricao }}
+  </button>
 </div>

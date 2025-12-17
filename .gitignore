@@ -26,3 +26,24 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Ambientes Virtuais Python
+venv-jogo-simulador-atividade-lesgislativa/
+
+# Outros nomes comuns de ambientes virtuais que podem ser úteis ignorar:
+venv/
+.venv/
+env/
+
+# Arquivos de cache e específicos do Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Arquivos de logs
+*.log
+
+# Dados e modelos que são grandes demais para o Git (se for o caso)
+# Adicione a linha abaixo se você tiver arquivos grandes como dqn_agente.pth
+# que não devem ser versionados (geralmente arquivos de mais de 50MB):
+# dqn_agente.pth
