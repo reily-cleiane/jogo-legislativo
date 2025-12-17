@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 import torch
 import random
+import copy
 
 from .state import GameState
 from .model import DQN
@@ -88,6 +89,38 @@ def estado_para_tensor(e: GameState):
 
 # ------------------ Endpoint ------------------
 
+@app.get("/inicio")
+def inicio():
+    global estado_jogador, estado_agente
+
+    estados_resultantes_agente = []
+    acoes_agente = []
+
+    while estado_agente.esforco_dia < 10:
+        obs = estado_para_tensor(estado_agente)
+
+        with torch.no_grad():
+            idx = torch.argmax(model(obs)).item()
+
+        acao = ACOES[idx]
+        aplicar_acao(estado_agente, acao)
+
+        acoes_agente.append(acao)
+
+        # 🔹 snapshot do estado após a ação
+        estados_resultantes_agente.append(copy.deepcopy(estado_agente))
+
+    # 🔹 virada do dia acontece depois
+    virada_dia(estado_agente)
+
+    return {
+        "estadoJogador": estado_jogador,
+        "acoesAgente": acoes_agente,
+        "estadosResultantes": estados_resultantes_agente,
+        "estadoViradaDia": estado_agente
+    }
+
+
 @app.post("/acao")
 def acao_jogador(payload: dict):
     global estado_jogador, estado_agente
@@ -97,20 +130,22 @@ def acao_jogador(payload: dict):
     estados_resultantes_agente = []
     acoes_agente = []
 
-    if estado_jogador.esforco_dia >= 9:
+    if estado_jogador.esforco_dia >= 10:
         virou_dia = True
         virada_dia(estado_jogador)
 
         estado_agente.acoes_dia = []
         
-        while estado_agente.esforco_dia < 9:
+        while estado_agente.esforco_dia < 10:
             obs = estado_para_tensor(estado_agente)
             with torch.no_grad():
                 idx = torch.argmax(model(obs)).item()
 
-            aplicar_acao(estado_agente, ACOES[idx])
-            acoes_agente.append(ACOES[idx])
-            estados_resultantes_agente.append(estado_agente)
+            acao = ACOES[idx]
+            aplicar_acao(estado_agente, acao)
+
+            acoes_agente.append(acao)
+            estados_resultantes_agente.append(copy.deepcopy(estado_agente))
 
         virada_dia(estado_agente)
 
@@ -118,5 +153,6 @@ def acao_jogador(payload: dict):
         "estadoJogador": estado_jogador,
         "virouDia": virou_dia,
         "acoesAgente": acoes_agente,
-        "estadosResultantes": estados_resultantes_agente
+        "estadosResultantes": estados_resultantes_agente,
+        "estadoViradaDia": estado_agente
     }
