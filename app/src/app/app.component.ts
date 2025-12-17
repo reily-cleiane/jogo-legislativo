@@ -110,7 +110,7 @@ export class AppComponent {
             }
           ]
         };
-      }, 5000);
+      },  1000 * (i + 1));
     });
   }
 }

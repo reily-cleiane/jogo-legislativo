@@ -32,6 +32,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
 }
 
 .scene img {
@@ -82,4 +83,12 @@
   border-left: 3px solid #2563eb;
   margin-bottom: 8px;
   border-radius: 6px;
+}
+
+progress{
+  accent-color: #39ac76; /* Green color */
+}
+
+progress.crise{
+  accent-color: #e45b39; /* Green color */
 }

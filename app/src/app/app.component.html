@@ -1,7 +1,6 @@
 <div class="game-root">
   <header class="top-bar">
     <h1>Simulação Legislativa</h1>
-    <span class="day">Dia {{ estadoJogador.dia }}</span>
   </header>
 
   <div class="board">
@@ -11,7 +10,6 @@
       <h2>Você</h2>
 
       <div class="stats">
-        <div><b>Dia:</b> {{ estadoJogador.dia }}</div>
         <div><b>Tem reunião:</b> {{ estadoJogador.tem_reuniao ? 'Sim' : 'Não' }}</div>
         <div><b>Em reunião:</b> {{ estadoJogador.em_reuniao ? 'Sim' : 'Não' }}</div>
         <div><b>Faltas:</b> {{ estadoJogador.faltas }}</div>
@@ -19,18 +17,18 @@
         <label>Popularidade</label>
         <progress max="10" [value]="estadoJogador.popularidade"></progress>
 
-        <label>Crise</label>
-        <progress max="10" [value]="estadoJogador.crise"></progress>
-
         <label>Transparência</label>
         <progress max="10" [value]="estadoJogador.transparencia"></progress>
 
         <label>Informação</label>
         <progress max="10" [value]="estadoJogador.informacao"></progress>
 
+        <label>Crise</label>
+        <progress class="crise" max="10" [value]="estadoJogador.crise"></progress>
+
         <div><b>Desempenho:</b> {{ estadoJogador.desempenho }}</div>
         <div><b>Orçamento aprovado:</b> {{ estadoJogador.orcamento_aprovado ? 'Sim' : 'Não' }}</div>
-        <div><b>Verba:</b> R$ {{ estadoJogador.verba }}</div>
+        <div><b>Verba:</b> {{ estadoJogador.verba | currency:'BRL':'symbol':'1.2-2' }}</div>
       </div>
 
       <h3>Ações do dia</h3>
@@ -45,6 +43,7 @@
 
     <!-- Cena -->
     <main class="scene">
+      <div style="width: 100%; text-align: center; font-size: 26px;"><p><b>Dia:</b> {{ estadoJogador.dia }}</p></div>
       <img src="/personagens.png" alt="Deputados" style="width: 1500px;">
     </main>
 
@@ -53,11 +52,25 @@
       <h2>Oponente</h2>
 
       <div class="stats">
+        <div><b>Tem reunião:</b> {{ estadoAgente.tem_reuniao ? 'Sim' : 'Não' }}</div>
+        <div><b>Em reunião:</b> {{ estadoAgente.em_reuniao ? 'Sim' : 'Não' }}</div>
+        <div><b>Faltas:</b> {{ estadoAgente.faltas }}</div>
+
         <label>Popularidade</label>
         <progress max="10" [value]="estadoAgente.popularidade"></progress>
 
+        <label>Transparência</label>
+        <progress max="10" [value]="estadoAgente.transparencia"></progress>
+
+        <label>Informação</label>
+        <progress max="10" [value]="estadoAgente.informacao"></progress>
+
         <label>Crise</label>
-        <progress max="10" [value]="estadoAgente.crise"></progress>
+        <progress class="crise" max="10" [value]="estadoAgente.crise"></progress>
+
+        <div><b>Desempenho:</b> {{ estadoAgente.desempenho }}</div>
+        <div><b>Orçamento aprovado:</b> {{ estadoAgente.orcamento_aprovado ? 'Sim' : 'Não' }}</div>
+        <div><b>Verba:</b> {{ estadoAgente.verba | currency:'BRL':'symbol':'1.2-2' }}</div>
       </div>
 
       <h3>Ações do agente</h3>
