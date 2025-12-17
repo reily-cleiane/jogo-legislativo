@@ -1,4 +1,5 @@
 import random
+from .actions import _clipar
 
 
 def virada_dia(estado):
@@ -26,3 +27,5 @@ def virada_dia(estado):
 
     estado.esforco_dia %= 10
     estado.acoes_dia = []
+
+    _clipar(estado)

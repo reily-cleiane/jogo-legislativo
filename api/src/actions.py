@@ -19,7 +19,7 @@ def aplicar_acao(estado: GameState, acao: str):
     elif acao == "elaborar_pl":
         if not estado.em_reuniao and "elaborar_pl" not in estado.acoes_dia:
             estado.desempenho += 1
-            delta = estado._impacto_popularidade(1)
+            delta = _impacto_popularidade(estado, 1)
             estado.popularidade += delta
         elif estado.em_reuniao:
             estado.desempenho -= 0.5
@@ -27,7 +27,7 @@ def aplicar_acao(estado: GameState, acao: str):
     elif acao == "relatar_pl":
         if estado.em_reuniao and "relatar_pl" not in estado.acoes_dia:
             estado.desempenho += 1
-            delta = estado._impacto_popularidade(1)
+            delta = _impacto_popularidade(estado, 1)
             estado.popularidade += delta
         elif not estado.em_reuniao:
             estado.desempenho -= 0.5
@@ -114,43 +114,44 @@ def aplicar_acao(estado: GameState, acao: str):
         estado.popularidade += 0.6 + ((3 * estado.popularidade) + (1 * estado.informacao) + (1 * estado.transparencia))/65
 
     _clipar(estado)
+    estado.esforco_dia += ESFORCO[acao]
     estado.acoes_dia.append(AcaoDia(nome=acao))
 
-def _impacto_popularidade(self, tipo = 1):
+def _impacto_popularidade(estado: GameState, tipo = 1):
     if tipo == 1:
-        if self.informacao > 5:
-            return 0.3 * self.informacao
-        return ( (0.1 * (self.informacao - 3)) - (random.random()*1.2))
+        if estado.informacao > 5:
+            return 0.3 * estado.informacao
+        return ( (0.1 * (estado.informacao - 3)) - (random.random()*1.2))
 
     if tipo == 2:
-        if self.informacao > 3:
-            return 0.3 * self.informacao
-        return ( (0.1 * (self.informacao - 1)) - (random.random()*1.2))
+        if estado.informacao > 3:
+            return 0.3 * estado.informacao
+        return ( (0.1 * (estado.informacao - 1)) - (random.random()*1.2))
 
-    return 0
+    return 0 
    
-def _clipar(self):
-    if self.faltas < 0:
-        self.faltas = 0
-    elif self.faltas > 10:
-        self.faltas = 10
+def _clipar(estado: GameState):
+    if estado.faltas < 0:
+        estado.faltas = 0
+    elif estado.faltas > 10:
+        estado.faltas = 10
 
-    if self.crise < 0:
-        self.crise = 0
-    elif self.crise > 10:
-        self.crise = 10
+    if estado.crise < 0:
+        estado.crise = 0
+    elif estado.crise > 10:
+        estado.crise = 10
 
-    if self.popularidade < 0:
-        self.popularidade = 0
-    elif self.popularidade > 10:
-        self.popularidade = 10
+    if estado.popularidade < 0:
+        estado.popularidade = 0
+    elif estado.popularidade > 10:
+        estado.popularidade = 10
 
-    if self.transparencia < 0:
-        self.transparencia = 0
-    elif self.transparencia > 10:
-        self.transparencia = 10
+    if estado.transparencia < 0:
+        estado.transparencia = 0
+    elif estado.transparencia > 10:
+        estado.transparencia = 10
 
-    if self.informacao < 0:
-        self.informacao = 0
-    elif self.informacao > 10:
-        self.informacao = 10
+    if estado.informacao < 0:
+        estado.informacao = 0
+    elif estado.informacao > 10:
+        estado.informacao = 10

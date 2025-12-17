@@ -63,6 +63,9 @@ INPUT_SIZE = 11
 model = DQN(INPUT_SIZE, len(ACOES))
 #model.load_state_dict(torch.load("dqn_agente.pth", map_location="cpu"))
 model.load_state_dict(torch.load(MODEL_PATH, map_location="cpu"))
+
+#Altera para o modelo utilizar float16, como no treinamento
+model.half()
 model.eval()
 
 
