@@ -34,7 +34,9 @@ export interface GameState {
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    this.pegarEstadosIniciais();
+  }
   title = 'app';
 
   acoes = [
@@ -76,9 +78,70 @@ export class AppComponent {
 
   estadoJogador: GameState = structuredClone(this.estadoInicial);
   estadoAgente: GameState   = structuredClone(this.estadoInicial);
+  acoesAgenteExecutadas: any[] = [];
+  filaExecucaoAgente: {
+    acao: string;
+    estado: any;
+  }[] = [];
 
   logAgente: any[] = [];
 
+  pegarEstadosIniciais() {
+    this.http.get<any>('http://localhost:8000/inicio')
+      .subscribe(res => {
+
+        this.estadoJogador = res.estadoJogador;
+
+        // estado inicial do agente (antes das ações)
+        this.estadoAgente = structuredClone(res.estadoJogador);
+
+        this.prepararExecucaoAgente(
+          res.acoesAgente,
+          res.estadosResultantes,
+          res.estadoViradaDia
+        );
+      });
+  }
+
+  prepararExecucaoAgente(
+    acoes: string[],
+    estados: any[],
+    estadoViradaDia: any
+  ) {
+    this.acoesAgenteExecutadas = [];
+
+    this.filaExecucaoAgente = acoes.map((acao, i) => ({
+      acao,
+      estado: estados[i]
+    }));
+
+    this.executarFilaAgente(estadoViradaDia);
+  }
+
+  executarFilaAgente(estadoViradaDia: any) {
+    const delay = 5000;
+
+    this.filaExecucaoAgente.forEach((item, index) => {
+      setTimeout(() => {
+
+        // atualiza estado visível
+        this.estadoAgente = structuredClone(item.estado);
+
+        // adiciona ação ao histórico visual
+        this.acoesAgenteExecutadas.push({
+          nome: item.acao
+        });
+
+        // se for a última ação → virada do dia
+        if (index === this.filaExecucaoAgente.length - 1) {
+          setTimeout(() => {
+            this.estadoAgente = structuredClone(estadoViradaDia);
+          }, delay);
+        }
+
+      }, delay * index);
+    });
+  }
 
   executarAcao(acao: string) {
     this.http.post<any>('http://localhost:8000/acao', { acao })
@@ -86,31 +149,14 @@ export class AppComponent {
 
         this.estadoJogador = res.estadoJogador;
 
-        if (res.virouDia && res.acoesAgente && res.estadosResultantes) {
-          this.executarAcoesAgenteComDelay(res.acoesAgente, res.estadosResultantes );
+        if (res.virouDia) {
+          this.prepararExecucaoAgente(
+            res.acoesAgente,
+            res.estadosResultantes,
+            res.estadoViradaDia
+          );
         }
       });
   }
-  executarAcoesAgenteComDelay(acoes: any[], estados: any[]) {
-    this.estadoAgente.acoes_dia = [];
 
-    acoes.forEach((acao: any, i: number) => {
-      setTimeout(() => {
-        this.estadoAgente = {
-          ...estados[i],
-          // ...this.estadoAgente,
-          // ...acao.estadoGerado,
-          acoes_dia: [
-            ...estados[i]['acoes_dia'],
-            // ...this.estadoAgente.acoes_dia,
-            {
-              nome: acao
-              //nome: acao.nome,
-              //efeitos: acao.estadoGerado
-            }
-          ]
-        };
-      },  1000 * (i + 1));
-    });
-  }
 }
