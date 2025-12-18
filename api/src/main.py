@@ -2,6 +2,7 @@ from fastapi import FastAPI
 import torch
 import random
 import copy
+import numpy as np
 
 from .state import GameState
 from .model import DQN
@@ -61,8 +62,7 @@ estado_agente = estado_inicial()
 # ------------------ Modelo ------------------
 
 INPUT_SIZE = 11
-model = DQN(INPUT_SIZE, len(ACOES))
-#model.load_state_dict(torch.load("dqn_agente.pth", map_location="cpu"))
+model = DQN(INPUT_SIZE + len(ACOES), len(ACOES))
 model.load_state_dict(torch.load(MODEL_PATH, map_location="cpu"))
 
 #Altera para o modelo utilizar float16, como no treinamento
@@ -71,20 +71,23 @@ model.eval()
 
 
 def estado_para_tensor(e: GameState):
-    return torch.tensor([
-        e.dia/365,
+    features_base = [
+        e.dia / 365,
         e.tem_reuniao,
         e.em_reuniao,
-        e.faltas/10,
-        e.desempenho/e.dia,
-        e.transparencia/10,
-        e.informacao/10,
-        e.crise/10,
-        e.popularidade/10,
+        e.faltas / 10,
+        e.desempenho / e.dia,
+        e.transparencia / 10,
+        e.informacao / 10,
+        e.crise / 10,
+        e.popularidade / 10,
         e.orcamento_aprovado,
         e.verba / 60000,
-        
-    ], dtype=torch.float16)
+    ]
+
+    status_acoes = [1.0 if acao in e.acoes_dia else 0.0 for acao in ACOES]
+
+    return np.array(features_base + status_acoes, dtype=np.float16)
 
 
 # ------------------ Endpoint ------------------
@@ -97,7 +100,9 @@ def inicio():
     acoes_agente = []
 
     while estado_agente.esforco_dia < 10:
-        obs = estado_para_tensor(estado_agente)
+        obs_np = estado_para_tensor(estado_agente)
+
+        obs = torch.tensor(obs_np, dtype=torch.float16).unsqueeze(0)
 
         with torch.no_grad():
             idx = torch.argmax(model(obs)).item()
@@ -137,7 +142,8 @@ def acao_jogador(payload: dict):
         estado_agente.acoes_dia = []
         
         while estado_agente.esforco_dia < 10:
-            obs = estado_para_tensor(estado_agente)
+            obs_np = estado_para_tensor(estado_agente)
+            obs = torch.tensor(obs_np, dtype=torch.float16).unsqueeze(0)
             with torch.no_grad():
                 idx = torch.argmax(model(obs)).item()
 

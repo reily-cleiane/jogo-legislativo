@@ -22,5 +22,5 @@ class GameState(BaseModel):
     orcamento_aprovado: int
     verba: float
 
-    esforco_dia: int
-    acoes_dia: List[AcaoDia]
+    esforco_dia: float
+    acoes_dia: List[str]

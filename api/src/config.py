@@ -17,8 +17,8 @@ ACOES = [
 ]
 
 ESFORCO = {
-    "entrar_reuniao": 1,
-    "sair_reuniao": 0,
+    "entrar_reuniao": 0.5,
+    "sair_reuniao": 0.5,
     "justificar_ausencia": 1,
     "elaborar_pl": 3,
     "relatar_pl": 3,

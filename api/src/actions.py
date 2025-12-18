@@ -2,133 +2,143 @@ import random
 from .state import GameState, AcaoDia
 from .config import ESFORCO
 
-def aplicar_acao(estado: GameState, acao: str):
+def aplicar_acao(estado: GameState, a: str):
     _clipar(estado)
     divisor = 100
-    fator_desempenho = 6.1 * (estado.desempenho/estado.dia)
+    r = -0.1
 
-    if acao == "entrar_reuniao" and not estado.em_reuniao:
+    if a == "entrar_reuniao":
+        if estado.tem_reuniao and not estado.em_reuniao and "entrar_reuniao" not in estado.acoes_dia:
+            r = 0.3 + (((2 * estado.informacao) + (2 * estado.transparencia) + (2 * estado.popularidade))/divisor)
         estado.em_reuniao = 1
 
-    elif acao == "sair_reuniao":
+    elif a == "sair_reuniao":
+        if estado.tem_reuniao and estado.em_reuniao and "sair_reuniao" not in estado.acoes_dia:
+            r = 0.2 + (((2 * estado.informacao) + (2 * estado.transparencia) + (2 * estado.popularidade))/divisor)
         estado.em_reuniao = 0
 
-    elif acao == "justificar_ausencia" and estado.faltas > 0 and "justificar_ausencia" not in estado.acoes_dia:
-        estado.faltas -= 2
+    elif a == "justificar_ausencia":
+        if estado.faltas > 0 and "justificar_ausencia" not in estado.acoes_dia:
+            estado.faltas -= (2 if estado.faltas >= 2 else 1)
+            r = 0.2 + (estado.transparencia + estado.popularidade)/200
 
-    elif acao == "elaborar_pl":
+    elif a == "elaborar_pl":
         if not estado.em_reuniao and "elaborar_pl" not in estado.acoes_dia:
-            estado.desempenho += 1
-            delta = _impacto_popularidade(estado, 1)
-            estado.popularidade += delta
+            r = 1.7 +  (((2.5 * estado.informacao) + estado.transparencia + (2.5*estado.popularidade))/divisor)
+            estado.popularidade += (0.5 + random.random())
         elif estado.em_reuniao:
-            estado.desempenho -= 0.5
+            r = -0.1 -(estado.faltas/30) - (estado.crise/30)
 
-    elif acao == "relatar_pl":
+    elif a == "relatar_pl":
         if estado.em_reuniao and "relatar_pl" not in estado.acoes_dia:
-            estado.desempenho += 1
-            delta = _impacto_popularidade(estado, 1)
-            estado.popularidade += delta
+            r = 1.7 +  (((2 * estado.informacao) + (2 * estado.transparencia) + (2 * estado.popularidade))/divisor)
         elif not estado.em_reuniao:
-            estado.desempenho -= 0.5
+            r = -0.1 -(estado.faltas/30) - (estado.crise/30)
 
-    elif acao == "divulgar_gastos" and "divulgar_gastos" not in estado.acoes_dia:
-        if not estado.em_reuniao:
-            estado.desempenho += 0.5
-            estado.transparencia += random.uniform(1, 3)
-        else:
-            estado.desempenho -= 0.5
+    elif a == "divulgar_gastos":
+        if not estado.em_reuniao and "divulgar_gastos" not in estado.acoes_dia:
+            r = 0.3 + (((1 * estado.informacao) + (4 * estado.transparencia) + (1 * estado.popularidade))/divisor)
+            estado.transparencia += (0.5 + random.random())
 
-    elif acao == "acessar_diario" and "acessar_diario" not in estado.acoes_dia:
-        if not estado.em_reuniao:
-            estado.desempenho += 0.5
-            estado.informacao += random.uniform(1, 3)
-        else:
-            estado.desempenho -= 0.5
+    elif a == "acessar_diario":
+        if not estado.em_reuniao and "acessar_diario" not in estado.acoes_dia:
+            r = (((5 * estado.informacao) + (0.5 * estado.transparencia) + (0.5 * estado.popularidade))/(divisor+20))
+            estado.informacao += (0.5 + random.random())
 
-    elif acao == "votar_materia":
+    elif a == "votar_materia":
         if estado.em_reuniao:
-            estado.desempenho += 0.5
-            estado.popularidade += _impacto_popularidade(estado, 1)
-        else:
-            estado.desempenho -= 0.5
+            r = 1 + (((2.5 * estado.informacao) + (1 * estado.transparencia) + (2.5 * estado.popularidade))/divisor)
+            estado.popularidade += random.random()
+        elif not estado.em_reuniao:
+            r = -0.1 -(estado.faltas/30) - (estado.crise/30)
 
-    elif acao == "discutir_materia":
+    elif a == "discutir_materia":
         if estado.em_reuniao:
-            estado.desempenho += 0.5
-            estado.popularidade += _impacto_popularidade(estado,2)
-        else:
-            estado.desempenho -= 0.5
+            r = 1 + (((1 * estado.informacao) + (4 * estado.transparencia) + (1 * estado.popularidade))/divisor)
+            estado.popularidade += random.random()
+        elif not estado.em_reuniao:
+            r = -0.1 -(estado.faltas/30) - (estado.crise/30)
 
-    elif acao == "atender_populacao":
-        if not estado.em_reuniao and estado.verba > 0:
-            custo = 30000 / max(1, estado.popularidade)
+    elif a == "atender_populacao":
+        media = (((1 * estado.informacao) + (1 * estado.transparencia) + (2 * estado.popularidade))/4)
+        custo = (30000 / max(1, media)) + estado.faltas*1000
+        if not estado.em_reuniao and estado.verba >= custo and not estado.tem_reuniao:
+            r = 2.3 + (((2 * estado.informacao) + (2 * estado.transparencia) + (2 * estado.popularidade))/(divisor-20))
             estado.verba -= custo
-            estado.desempenho += 1
-            estado.informacao += (1.6 * estado.popularidade / 4) + random.random()
-        elif estado.verba <= 0:
-            estado.popularidade = (estado.popularidade/1.2) - random.random()
-            estado.informacao = (estado.informacao/1.2) - random.random()
-            estado.desempenho -= 2
+            estado.informacao += (0.6 + random.random())
+            estado.transparencia += (0.2 + random.random())
+            estado.popularidade += (0.4 + random.random())
+        elif estado.verba < custo:
+            r = -1 -(estado.faltas/30) - (estado.crise/30)
+            estado.verba -= (1000 + (estado.faltas * 200) + (estado.crise * 200))
         else:
-            estado.desempenho -= 1
+            r = -0.3
 
-    elif acao == "convocar_audiencia":
-        if not estado.em_reuniao and estado.verba > 0:
-            custo = 20000 / max(1, estado.popularidade)
+    elif a == "convocar_audiencia":
+        media = (((0.5 * estado.informacao) + (2 * estado.transparencia) + (1.5 * estado.popularidade))/4)
+        custo = 20000 / max(1, media) + estado.faltas*1000
+        if not estado.em_reuniao and estado.verba >= custo and not estado.tem_reuniao:
+            r = 2.3 + (((2 * estado.informacao) + (2 * estado.transparencia) + (2 * estado.popularidade))/(divisor-20))
             estado.verba -= custo
-            estado.desempenho += 1
-            estado.informacao += random.uniform(1, 3) + ( (estado.popularidade+1) / 6)
-            estado.transparencia += random.uniform(1, 3) + ((estado.popularidade+1) / 6)
-        elif estado.verba <= 0:
-            estado.popularidade = (estado.popularidade/1.2) - random.random()
-            estado.transparencia = (estado.transparencia/1.2) - random.random()
-            estado.desempenho -= 2
+            estado.informacao += (0.6 + random.random())
+            estado.transparencia += (0.6 + random.random())
+            estado.popularidade += (0.1 + random.random())
+        elif estado.verba < custo:
+            r = -1 -(estado.faltas/30) - (estado.crise/30)
+            estado.verba -= (1000 + (estado.faltas * 200) + (estado.crise * 200))
         else:
-            estado.desempenho -= 1
+            r = -0.3
 
-    elif acao == "aprovar_orcamento" and estado.dia > 300 and not estado.orcamento_aprovado:
-        estado.orcamento_aprovado = 1
-        estado.desempenho += 20
-        estado.informacao = 10
-        estado.transparencia = 10
-        estado.popularidade = 10
+    elif a == "aprovar_orcamento":
+        if estado.dia > 300 and not estado.orcamento_aprovado:
+            estado.orcamento_aprovado = 1
+            estado.informacao = 10
+            estado.transparencia = 10
+            estado.popularidade = 10
+            r = 5
 
-    elif acao == "tarefas_admin":
-        if not estado.em_reuniao:
-            estado.desempenho += 0.5
-            estado.verba += 1000
+    elif a == "tarefas_admin":
+        if not estado.em_reuniao and "tarefas_admin" not in estado.acoes_dia:
+            r = (((1 * estado.informacao) + (4 * estado.transparencia) + (1 * estado.popularidade))/(divisor+20))
+            estado.verba += 1000 + ((((0.5 * estado.informacao) + (2.5 * estado.transparencia) + (1 * estado.popularidade))/4)*500)
 
-    elif acao == "lidar_crise":
-        if not estado.em_reuniao and estado.verba > 3000:
-            reducao = (random.random() + 0.3 ) * ((2+ estado.popularidade/10) + (2+ estado.transparencia/10) + (1+ estado.informacao/10))/3
-            estado.verba -= 3000
-            estado.desempenho += 1
-            estado.crise -= reducao
+    elif a == "lidar_crise":
+        media = (((1.5 * estado.informacao) + (2 * estado.transparencia) + (0.5 * estado.popularidade))/4)
+        custo = (5000 / max(1, media)) + estado.faltas*1000
+        if not estado.em_reuniao and estado.verba >= custo and estado.crise > 0 and "lidar_crise" not in estado.acoes_dia:
+            reducao = 0.4 + (((1.5 * estado.informacao) + (2 * estado.transparencia) + (0.5 * estado.popularidade))/40) + random.random()
+            r = 0.3 + (((2.5 * estado.informacao) + (2.5 * estado.transparencia) + (1 * estado.popularidade))/(divisor)) - ((10 - estado.crise)/30)
+            estado.verba -= custo
+            estado.crise = (estado.crise - reducao) if estado.crise - reducao >= 0 else 0
+        elif estado.verba < custo or estado.em_reuniao:
+            r = -1 - (estado.crise/30)
+            estado.verba -= (1000 + (estado.crise * 100))
+            
+        elif estado.em_reuniao:
+            r = -0.1 - (estado.crise/30)
+            estado.verba -= (1000 + (estado.crise * 100))
+
+    elif a == "acao_social":
+        media = (((0.5 * estado.informacao) + (2 * estado.transparencia) + (1.5 * estado.popularidade))/4)
+        custo = (20000 / max(1, media)) + estado.faltas*1000
+        if not estado.em_reuniao and estado.verba >= custo and not estado.tem_reuniao:
+            r = 1 + (((1 * estado.informacao) + (1 * estado.transparencia) + (4 * estado.popularidade))/(divisor-20))
+            estado.verba -= custo
+            estado.transparencia += (0.2 + random.random())
+            estado.popularidade += (0.6 + random.random())
+        elif estado.verba < custo:
+            r = -1 -(estado.faltas/30) - (estado.crise/30)
+            estado.verba -= (1000 + (estado.faltas * 200) + (estado.crise * 200))
         else:
-            estado.desempenho -= 0.5
-
-    elif acao == "acao_social":
-        estado.desempenho += 0.5
-        estado.verba -= 5000
-        estado.popularidade += 0.6 + ((3 * estado.popularidade) + (1 * estado.informacao) + (1 * estado.transparencia))/65
+            r = -0.2
 
     _clipar(estado)
-    estado.esforco_dia += ESFORCO[acao]
-    estado.acoes_dia.append(AcaoDia(nome=acao))
+    estado.desempenho += r
+    estado.esforco_dia += ESFORCO[a]
+    estado.acoes_dia.append(a)
 
-def _impacto_popularidade(estado: GameState, tipo = 1):
-    if tipo == 1:
-        if estado.informacao > 5:
-            return 0.3 * estado.informacao
-        return ( (0.1 * (estado.informacao - 3)) - (random.random()*1.2))
+    return r
 
-    if tipo == 2:
-        if estado.informacao > 3:
-            return 0.3 * estado.informacao
-        return ( (0.1 * (estado.informacao - 1)) - (random.random()*1.2))
-
-    return 0 
    
 def _clipar(estado: GameState):
     if estado.faltas < 0:
